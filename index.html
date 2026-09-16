@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>기업보고서 비주얼 스튜디오</title>
+  <meta name="description" content="기업분석 보고서용 차트와 도식을 빠르게 만들고 PNG·SVG로 저장하는 도구">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b3157'/%3E%3Cpath d='M16 46V29h8v17zm12 0V18h8v28zm12 0V25h8v21z' fill='%23fff'/%3E%3C/svg%3E">
+  <style>
+    :root{
+      --ink:#172238;--muted:#657187;--line:#dfe4eb;--soft:#f4f6f9;--paper:#fff;
+      --navy:#1b3157;--blue:#3973d5;--accent:#e7a73d;--shadow:0 18px 50px rgba(23,34,56,.12);
+      font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",Inter,system-ui,sans-serif;color:var(--ink)
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:#eef1f5;min-height:100vh;overflow:hidden}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .topbar{height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px;position:relative;z-index:10}
+    .brand{display:flex;align-items:center;gap:12px;min-width:250px}
+    .mark{width:34px;height:34px;border-radius:9px;background:var(--navy);display:grid;grid-template-columns:repeat(3,5px);align-items:end;justify-content:center;gap:3px;padding-bottom:8px}
+    .mark i{background:#fff;border-radius:2px 2px 0 0}.mark i:nth-child(1){height:10px}.mark i:nth-child(2){height:17px}.mark i:nth-child(3){height:13px}
+    .brand strong{font-size:17px;letter-spacing:-.03em}.brand span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+    .top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .btn{height:38px;padding:0 14px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#344158;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:7px}
+    .btn:hover{background:var(--soft)}.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.primary:hover{background:#25436f}
+    .workspace{height:calc(100vh - 64px);display:grid;grid-template-columns:244px minmax(460px,1fr) 330px}
+    .panel{background:#fff;overflow:auto}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}
+    .panel-head{padding:18px 18px 10px}.eyebrow{font-size:11px;font-weight:800;color:#8993a4;letter-spacing:.11em;text-transform:uppercase}.panel h2{font-size:15px;margin:6px 0 0;letter-spacing:-.02em}
+    .template-list{padding:6px 10px 20px;display:grid;gap:6px}
+    .template{width:100%;border:1px solid transparent;background:#fff;padding:11px 10px;border-radius:9px;text-align:left;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;color:var(--ink)}
+    .template:hover{background:var(--soft)}.template.active{background:#edf3fb;border-color:#c8d8f0;color:#1b4b8e}
+    .template .icon{width:34px;height:34px;border-radius:8px;background:#f0f3f7;display:grid;place-items:center;font-size:16px}.template.active .icon{background:#dce9fa}
+    .template strong{font-size:14px;display:block}.template small{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+    .stage{min-width:0;display:flex;flex-direction:column;background:#eef1f5}
+    .stage-toolbar{height:50px;padding:0 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #d9dee6;background:#f7f8fa}
+    .stage-toolbar .status{font-size:12px;color:var(--muted);margin-right:auto;display:flex;align-items:center;gap:7px}
+    .dot{width:7px;height:7px;background:#2e9b68;border-radius:50%}
+    .seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff}
+    .seg button{border:0;background:#fff;height:31px;padding:0 10px;color:var(--muted);font-size:12px}.seg button+button{border-left:1px solid var(--line)}.seg button.active{background:var(--navy);color:#fff}
+    .canvas-wrap{flex:1;min-height:0;overflow:auto;padding:28px;display:flex;align-items:flex-start}
+    .canvas{margin:auto;flex-shrink:0;width:min(100%,1100px);background:#fff;box-shadow:var(--shadow);aspect-ratio:16/9;transition:aspect-ratio .2s;position:relative;overflow:hidden}
+    #graphic{display:block;width:100%;height:100%}
+    .hintbar{height:40px;padding:0 18px;display:flex;align-items:center;justify-content:center;color:#778297;font-size:12px;background:#f7f8fa;border-top:1px solid #d9dee6}
+    .form{padding:13px 16px 34px}.section{border-bottom:1px solid var(--line);padding:7px 0 17px;margin-bottom:13px}.section:last-child{border:0}
+    .section-title{font-size:12px;font-weight:800;letter-spacing:.03em;margin-bottom:11px;color:#37445a;display:flex;align-items:center;justify-content:space-between}
+    label{font-size:12px;font-weight:700;color:#576277;display:block;margin:10px 0 6px}
+    input,textarea,select{width:100%;border:1px solid #d8dee7;border-radius:7px;background:#fff;color:var(--ink);outline:none}
+    input,select{height:38px;padding:0 10px}textarea{min-height:168px;padding:10px;resize:vertical;line-height:1.55;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+    input:focus,textarea:focus,select:focus{border-color:#6e95ce;box-shadow:0 0 0 3px rgba(57,115,213,.1)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .data-help{font-size:11px;color:#8290a3;line-height:1.5;margin-top:6px}
+    .mini-actions{display:flex;gap:6px;margin-top:9px}.mini-actions .btn{height:33px;font-size:12px;padding:0 10px;flex:1;justify-content:center}
+    .palette{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .swatch{height:32px;border-radius:7px;border:2px solid transparent;padding:4px;background:#fff}.swatch i{display:block;height:100%;border-radius:4px}.swatch.active{border-color:#3e6ba7}
+    .checks{display:flex;align-items:center;gap:9px;margin-top:10px}.checks input{width:17px;height:17px}.checks label{margin:0;font-size:12px}
+    .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#172238;color:white;padding:10px 15px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,24,40,.42);display:none;place-items:center;z-index:40;padding:20px}.modal-backdrop.open{display:grid}
+    .modal{width:min(620px,100%);background:#fff;border-radius:14px;padding:24px;box-shadow:var(--shadow)}.modal h3{margin:0 0 10px}.modal p,.modal li{font-size:14px;line-height:1.7;color:#526078}.modal code{background:#f0f3f7;padding:2px 5px;border-radius:4px}.modal .close{float:right}
+    @media(max-width:1050px){body{overflow:auto}.workspace{height:auto;grid-template-columns:210px minmax(420px,1fr)}.right{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}.form{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.stage{height:calc(100vh - 64px)}}
+    @media(max-width:720px){.topbar{padding:0 12px}.brand span,.btn .hide-sm{display:none}.brand{min-width:0}.workspace{display:block}.left{border-right:0}.panel-head{padding-bottom:6px}.template-list{display:flex;overflow-x:auto}.template{min-width:155px}.stage{height:580px}.canvas-wrap{padding:14px}.right .form{display:block}.top-actions .btn{padding:0 10px}}
+    .workflow-card{background:#edf3fb;border:1px solid #c8d8f0;border-radius:10px;padding:13px;margin-bottom:18px}
+    .workflow-card p{font-size:14px;line-height:1.6;color:#526078;margin:6px 0 12px}
+    .workflow-card .btn{width:100%;justify-content:center;margin-top:6px}
+    .error-note{font-size:14px;line-height:1.6;color:#a32a35;background:#fff2f3;border-radius:7px;padding:10px;margin-top:8px}
+    .error-note:empty{display:none}
+    #workflowDialog{width:min(1000px,calc(100vw - 32px));max-height:90vh;border:0;border-radius:16px;padding:0;color:var(--ink);box-shadow:var(--shadow)}
+    #workflowDialog::backdrop{background:rgba(15,24,40,.55)}
+    .dialog-header{position:sticky;top:0;z-index:1;background:white;border-bottom:1px solid var(--line);padding:20px 24px;display:flex;align-items:center;gap:16px}
+    .dialog-header h2{font-size:21px;margin:0;flex:1}.dialog-body{padding:22px 24px}
+    .workflow-nav{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .workflow-nav .active{background:var(--navy);color:white}
+    .workflow-columns{display:grid;grid-template-columns:1fr 1.25fr;gap:24px}
+    .workflow-columns label{font-size:14px}.workflow-columns p{font-size:14px;line-height:1.65;color:#576277}
+    .workflow-columns pre{font:13px/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f6f9;padding:12px;border-radius:8px}
+    #promptPreview{min-height:370px;font-size:14px;line-height:1.65;background:#f8fafc}
+    #answerInput{min-height:270px;font-size:14px}
+    #requestGoal{min-height:76px;font-size:14px;line-height:1.6}
+    .workflow-note{background:#f4f6f9;padding:12px 15px;border-radius:9px;font-size:14px;line-height:1.7;color:#526078}
+    .workflow-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+    [hidden]{display:none!important}.btn:disabled{opacity:.45;cursor:not-allowed}
+    @media(max-width:720px){.workflow-columns{grid-template-columns:1fr}.dialog-body{padding:16px}.dialog-header{padding:16px}.topbar{height:auto;min-height:64px;flex-wrap:wrap;padding-block:10px}.top-actions{flex-wrap:wrap}.hintbar{height:auto;min-height:40px;text-align:center;padding:8px}}
+  </style>
+  <link rel="stylesheet" href="./studio.css">
+  <link rel="stylesheet" href="./usability.css">
+  <link rel="stylesheet" href="./projects.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="mark"><i></i><i></i><i></i></div><div><strong>기업보고서 비주얼 스튜디오</strong><span>REPORT VISUAL STUDIO</span></div></div>
+    <div id="companyIndicator" hidden><strong id="currentCompany"></strong><span id="projectSaveStatus" role="status"></span><button class="btn" id="changeCompany">기업 변경</button><button class="btn" id="saveProjectNow">지금 저장</button></div>
+    <div class="top-actions" id="projectActions" hidden>
+      <button class="btn" id="helpBtn">사용법</button>
+      <button class="btn" id="shelfBtn">이 기업의 도식</button>
+      <button class="btn primary" id="reportReviewBtn">보고서 첨부·도식 추천</button>
+      <button class="btn" id="loadBtn">불러오기</button>
+      <button class="btn" id="saveBtn">작업 저장</button>
+      <button class="btn primary" id="pngBtn">PNG <span class="hide-sm">내려받기</span></button>
+    </div>
+    <input type="file" id="fileInput" accept=".json" hidden>
+  </header>
+  <section id="companyHome">
+    <p>개인 저장 모드 · 자료와 사진은 현재 브라우저에만 저장됩니다. 다른 컴퓨터로 옮기거나 자료를 보관할 때 ‘기업 작업 백업’을 사용하세요.</p>
+    <div class="company-home-head"><div><p class="eyebrow">REPORT WORKSPACE</p><h1>어떤 기업의 보고서를 작성할까요?</h1><p>기업을 선택하면 목차별 내용과 도식을 이어서 작성할 수 있습니다.</p></div></div>
+    <form id="createCompanyForm" class="new-company"><label for="newCompanyName">새 기업 추가</label><div><input id="newCompanyName" placeholder="기업명 입력" required autocomplete="off"><button class="btn primary" id="createCompanyButton" type="submit">기업 추가</button></div></form>
+    <p id="companyHomeStatus" role="status">기업 목록을 불러오는 중…</p><button class="btn" id="reloadCompanies">목록 새로고침</button>
+    <div id="companyCards"></div>
+  </section>
+  <main class="workspace" id="projectWorkspace" hidden>
+    <aside class="panel left">
+      <div class="panel-head"><div class="eyebrow">REPORT CONTENTS</div><h2>보고서 목차</h2></div>
+      <nav id="chapterNav" aria-label="보고서 목차"></nav>
+      <div class="project-backups"><button class="btn" id="backupProject">기업 작업 백업</button><button class="btn" id="restoreProject">백업 불러오기</button><button class="btn" id="recoverLocalDraft" hidden>복구 초안 내려받기</button><button class="btn" id="reloadProjectFromServer" hidden>백업 후 저장본 다시 열기</button><input id="projectBackupInput" type="file" accept=".json" hidden></div>
+    </aside>
+
+    <section class="stage">
+      <div class="chapter-panel">
+        <div class="chapter-title"><div><h2 id="chapterTitle"></h2><p id="chapterQuestion"></p></div><button class="btn primary" id="newChapterChart">＋ 도식 추가</button></div>
+        <details id="chapterNotesPanel" open><summary>작성 내용과 추가 확인 사항</summary>
+          <div class="chapter-fields"><div><label for="chapterNotes">보고서 본문·분석 메모</label><textarea id="chapterNotes" placeholder="이 항목에 작성할 보고서 내용을 적거나 붙여넣으세요."></textarea></div><div><label for="chapterQuestions">추가로 확인할 정보</label><textarea id="chapterQuestions" placeholder="예: 고객별 매출 비중, 지분율 기준일, 제품 사진 요청"></textarea></div></div>
+          <div class="checks"><input id="chapterComplete" type="checkbox"><label for="chapterComplete">이 항목의 작성·검토를 완료했습니다</label></div>
+        </details>
+        <div id="chapterChartList" aria-label="이 목차의 도식 목록"></div>
+      </div>
+      <div class="stage-toolbar">
+        <div class="status"><span class="dot"></span><span id="statusText">자동 저장됨</span></div>
+        <div class="seg" id="ratioSeg">
+          <button data-ratio="16:9" class="active">16:9</button><button data-ratio="3:2">3:2</button><button data-ratio="4:3">4:3</button><button data-ratio="1:1">1:1</button>
+        </div>
+        <button class="btn" id="viewSizeBtn" title="항목이 많으면 실제 크기로 확대하고 스크롤하세요">실제 크기</button><button class="btn" id="svgBtn">SVG</button>
+        <button class="btn" id="copyBtn">이미지 복사</button>
+      </div>
+      <div class="canvas-wrap" tabindex="0" aria-label="도표 미리보기. 가로·세로로 스크롤할 수 있습니다.">
+        <div id="emptyChapter"><h3>이 항목에 넣을 도식을 추가하세요</h3><p>‘도식 추가’를 누르면 이 목차에 맞는 유형과 필요한 자료가 표시됩니다.</p></div>
+        <div class="canvas" id="canvas"><svg id="graphic" role="img" aria-label="보고서용 그래픽 미리보기"></svg></div>
+      </div>
+      <div class="hintbar">기업 선택 → 보고서 목차 → 도식 추가 → 요청문·원자료를 ChatGPT에 전달 → 답변 적용 · 이 브라우저에 기업별 자동 저장 · 다른 기기로 옮길 때 기업 작업 백업</div>
+    </section>
+
+    <aside class="panel right" id="chartEditor">
+      <div class="chart-management"><label for="chartName">도식 이름</label><input id="chartName"><div class="mini-actions"><button class="btn" id="duplicateChart">복제</button><button class="btn" id="deleteChart">삭제</button></div></div>
+      <div class="panel-head"><div class="eyebrow">02 Edit</div><h2>내용과 스타일</h2></div>
+      <div class="form">
+        <div class="section photo-section" id="productImages" hidden>
+          <div class="section-title">제품 사진 넣기</div>
+          <label for="photoProduct">사진을 넣을 제품</label><select id="photoProduct"></select>
+          <label class="photo-drop" id="photoDrop" for="photoInput"><strong>＋ 사진을 선택하거나 여기에 끌어 놓으세요</strong><span>PNG · JPG · WebP</span><input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <img id="photoPreview" alt="선택한 제품 사진 미리보기" hidden>
+          <p class="data-help" id="photoStatus">선택한 제품의 사진이 도표에도 함께 들어갑니다.</p>
+          <label for="annotationText">부품명·기능 설명</label><input id="annotationText" placeholder="예: 유체 흡입구">
+          <div class="mini-actions"><button class="btn" id="addAnnotation">위치 표시</button><button class="btn" id="addArrow">방향 화살표</button></div>
+          <p class="data-help" id="photoHint">사진을 넣은 뒤 ‘위치 표시’를 누르고 사진을 클릭하세요. 화살표는 시작점과 끝점을 차례로 클릭합니다.</p>
+          <div class="mini-actions"><button class="btn" id="undoAnnotation">마지막 주석 취소</button><button class="btn" id="removePhoto">사진 제거</button></div>
+        </div>
+        <div class="section">
+          <div class="section-title">보고서에 맞추기</div>
+          <label for="displayMode">표현 방식</label><select id="displayMode"><option value="native">추천 도표·도식</option><option value="table">표</option><option value="cards">카드</option></select>
+          <div class="row"><div><label for="layoutWidth">가로폭 (px)</label><input id="layoutWidth" type="number" min="600" step="50" value="1200"></div><div><label for="fontSize">본문 글자 (px)</label><input id="fontSize" type="number" min="10" step="1" value="16"></div></div>
+          <div class="row"><div><label for="spacing">간격 배수</label><input id="spacing" type="number" min="0.5" step="0.1" value="1"></div><div><label for="printWidth">워드 삽입 폭 (cm)</label><input id="printWidth" type="number" min="1" step="0.5" value="16"></div></div>
+          <p class="data-help" id="printHint"></p>
+        </div>
+        <div class="workflow-card">
+          <div class="section-title">자료 정리는 ChatGPT에게</div>
+          <p>원본 엑셀·표를 직접 고치지 마세요. 선택한 유형의 요청문을 자료와 함께 이 대화에 보내주세요.</p>
+          <button class="btn primary" id="openPromptBtn">① 유형별 요청문 보기·복사</button>
+          <button class="btn" id="openAnswerBtn">② ChatGPT 답변 붙여넣기</button>
+          <div class="data-help">항목·단계 수 상한 없음 · 도표 자동 확장<br>사이트 내 AI 연결·API 키가 필요 없습니다.</div>
+        </div>
+        <div class="section">
+          <div class="section-title">제목</div>
+          <label for="title">도표 제목</label><input id="title" value="최근 3개년 매출 추이 (가상 예시)">
+          <label for="subtitle">핵심 메시지</label><input id="subtitle" value="입력 형식을 보여주는 가상 데이터">
+          <div class="row">
+            <div><label for="unit">단위</label><input id="unit" value="억원"></div>
+            <div><label for="source">출처</label><input id="source" value="감사보고서, 당사 분석"></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title"><span>데이터</span><span id="rowCount">3개 항목</span></div>
+          <label for="dataInput">변환된 데이터 · 직접 수정 가능</label><textarea id="dataInput" spellcheck="false"></textarea><div class="error-note" id="dataError" role="alert"></div>
+          <div class="data-help" id="dataHelp"></div>
+          <div class="mini-actions"><button class="btn" id="sampleBtn">예시 데이터</button><button class="btn" id="promptBtn">유형별 요청문</button></div>
+        </div>
+        <div class="section">
+          <div class="section-title">스타일</div>
+          <div class="palette" id="palette">
+            <button class="swatch active" data-theme="navy" aria-label="네이비"><i style="background:linear-gradient(90deg,#1b3157 0 33%,#3973d5 33% 66%,#e7a73d 66%)"></i></button>
+            <button class="swatch" data-theme="forest" aria-label="포레스트"><i style="background:linear-gradient(90deg,#173d35 0 33%,#2f846d 33% 66%,#d4a84f 66%)"></i></button>
+            <button class="swatch" data-theme="burgundy" aria-label="버건디"><i style="background:linear-gradient(90deg,#552637 0 33%,#a14c62 33% 66%,#d59a51 66%)"></i></button>
+            <button class="swatch" data-theme="mono" aria-label="모노"><i style="background:linear-gradient(90deg,#252b35 0 33%,#707987 33% 66%,#b7bdc6 66%)"></i></button>
+          </div>
+          <div class="checks"><input type="checkbox" id="showValues" checked><label for="showValues">수치·세부설명 표시</label></div>
+          <div class="checks"><input type="checkbox" id="transparent"><label for="transparent">배경 투명(SVG·PNG)</label></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <div class="modal-backdrop" id="modal">
+    <div class="modal"><button class="btn close" id="closeModal">닫기</button><h3>원본 자료를 그래프로 바꾸는 방법</h3>
+      <ol><li>왼쪽에서 차트·도식을 고르고 <strong>① 유형별 요청문 보기·복사</strong>를 누릅니다.</li><li>복사한 요청문과 원본 엑셀·표를 <strong>ChatGPT 대화에 함께</strong> 보냅니다. 이 사이트가 자료를 AI로 전송하지는 않습니다.</li><li>ChatGPT의 변환 결과를 <strong>② ChatGPT 답변 붙여넣기</strong>에 넣고 적용합니다. 제목·단위·출처·데이터가 한 번에 들어갑니다.</li><li>원자료와 그래프를 확인한 뒤 PNG·SVG로 저장합니다.</li></ol>
+      <p>숫자 누락·단위 혼동·증감 합계 오류는 먼저 확인하세요. 예시 데이터는 사용법을 위한 가상 자료이며 보고서에 그대로 사용하면 안 됩니다.</p>
+      <p>기업을 선택하고 왼쪽 목차에서 본문·추가 확인 사항과 도식을 작성하세요. 변경사항과 사진은 이 브라우저에 자동 저장됩니다. 브라우저 데이터 삭제 시 사라질 수 있으므로 기업 작업 백업을 보관해주세요. 기존 온라인 사이트의 자료는 자동 이전되지 않습니다. 상단의 <strong>저장됨</strong>을 확인해주세요. <code>기업 작업 백업</code>은 전체 목차, <code>작업 저장</code>은 현재 도식을 내려받습니다.</p>
+    </div>
+  </div>
+
+  <dialog id="workflowDialog" aria-labelledby="workflowTitle">
+    <div class="dialog-header"><h2 id="workflowTitle">ChatGPT로 데이터 정리하기</h2><button class="btn" id="closeWorkflow">닫기</button></div>
+    <div class="dialog-body">
+      <div class="workflow-nav"><button class="btn active" id="promptTab">① 요청문 복사</button><button class="btn" id="answerTab">② 답변 적용</button></div>
+      <section id="promptPane">
+        <div class="workflow-columns">
+          <div>
+            <label for="promptType">유형별 전용 요청문</label><select id="promptType"></select>
+            <label for="requestGoal">보여주고 싶은 내용 (선택)</label><textarea id="requestGoal" placeholder="예: 2019~2025년 제주 프로판 판매량 추이"></textarea>
+            <p id="typePurpose"></p>
+            <label>사이트 입력 형식</label><pre id="typeSchema"></pre>
+            <label>가상 데이터 예시 · 원자료로 교체</label><pre id="typeSample"></pre>
+            <p id="typeCaution"></p>
+          </div>
+          <div>
+            <label for="promptPreview">원본 자료와 함께 ChatGPT에 보낼 요청문</label><textarea id="promptPreview" readonly spellcheck="false"></textarea>
+            <div class="workflow-actions"><button class="btn primary" id="copyPromptFull">요청문 전체 복사</button></div>
+            <p>복사한 요청문과 엑셀 파일 또는 표를 ChatGPT에 보내주세요. 변환 결과는 옆의 ‘② 답변 적용’에서 넣습니다.</p>
+          </div>
+        </div>
+      </section>
+      <section id="answerPane" hidden>
+        <p class="workflow-note">ChatGPT가 반환한 JSON 코드 내용을 그대로 붙여넣으세요. 제목·핵심 메시지·단위·출처·데이터가 함께 적용됩니다. 원본 엑셀 자체를 해석하는 기능은 아닙니다.</p>
+        <label for="answerInput">ChatGPT 변환 답변</label><textarea id="answerInput" spellcheck="false" placeholder='{"type":"line","title":"연도별 판매량","subtitle":"","unit":"톤","source":"원자료명","data":["2023 | 100","2024 | 120"]}'></textarea>
+        <div id="answerError" class="error-note" role="alert"></div>
+        <div class="workflow-actions"><button class="btn primary" id="applyAnswer">그래프에 한 번에 적용</button><button class="btn" id="undoAnswer" disabled>직전 적용 취소</button></div>
+        <p class="data-help">데이터 행만 받은 경우에는 기존 오른쪽 데이터 칸에 붙여넣어도 됩니다. 적용 전 기존 그래프는 그대로 유지됩니다.</p>
+      </section>
+    </div>
+  </dialog>
+  <dialog id="shelfDialog" aria-labelledby="shelfTitle">
+    <div class="dialog-header"><h2 id="shelfTitle">회사별 보관함</h2><button class="btn" id="closeShelf">닫기</button></div>
+    <div class="dialog-body">
+      <div class="row"><div><label for="companyName">회사명</label><input id="companyName" placeholder="예: 제주비케이"></div><div><label for="assetName">결과물 이름</label><input id="assetName" placeholder="예: 2025년 지배구조"></div></div>
+      <div class="workflow-actions"><button class="btn primary" id="saveNewAsset">새 결과물로 보관</button><button class="btn" id="updateAsset" disabled>열어 둔 결과물 업데이트</button></div>
+      <p id="shelfStatus" role="status"></p>
+      <label for="companyFilter">회사명으로 찾기</label><input id="companyFilter" placeholder="전체 회사">
+      <div id="savedAssets"></div>
+    </div>
+  </dialog>
+  <dialog id="reportDialog" aria-labelledby="reportTitle">
+    <div class="dialog-header"><h2 id="reportTitle">보고서에서 도식 찾기</h2><button class="btn" id="closeReport">닫기</button></div>
+    <div class="dialog-body">
+      <p class="workflow-note">워드 보고서를 넣으면 문단·표를 읽어 <strong>어디에 어떤 도식을 넣을지</strong>와 <strong>확인할 자료</strong>를 정리합니다. 제목·문장·표의 패턴을 이용한 1차 추천이며, AI 의미 분석은 아닙니다. 더 자세한 검토는 아래 요청문을 복사해 ChatGPT에서 진행하세요.</p>
+      <label class="report-drop" for="reportFile"><strong>＋ 워드 보고서 첨부</strong><span>.docx · 문서 내용은 이 브라우저에서 읽습니다.</span><input id="reportFile" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+      <details><summary>보고서 내용을 직접 붙여넣기</summary><label for="reportText">보고서 본문</label><textarea id="reportText" placeholder="소제목과 본문·표를 함께 붙여넣으세요."></textarea><button class="btn" id="analyzeReportText">붙여넣은 내용 검토</button></details>
+      <p id="reportStatus" role="status">보고서를 첨부하면 추천 목록이 여기에 표시됩니다.</p>
+      <div class="workflow-actions"><button class="btn primary" id="copyReportPrompt" disabled>전체 보고서 검토 요청문 복사</button></div>
+      <p class="data-help">추천 항목의 ‘변환 요청문’을 누르면 해당 부분과 전용 형식이 함께 준비됩니다. 자료가 충분한지는 원문과 대조하고, 부족한 정보는 먼저 확인하세요.</p>
+      <div id="reportRecommendations"></div>
+      <details id="reportExtracted" hidden><summary>추출한 원문 확인</summary><pre id="reportSource"></pre></details>
+    </div>
+  </dialog>
+  <dialog id="newChartDialog" aria-labelledby="newChartTitle"><div class="dialog-header"><h2 id="newChartTitle">이 목차에 넣을 도식</h2><button class="btn" id="closeNewChart">닫기</button></div><div class="dialog-body"><div id="chapterTemplateChoices"></div><details><summary>전체 도표·도식 유형에서 고르기</summary><div class="template-list" id="templateList"></div></details></div></dialog>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const templates=[
+  {id:'bar',name:'막대 차트',desc:'매출·점유율 비교',icon:'▥',help:'항목 | 값 | 보조설명(선택)',sample:'2023 | 465 | 기준연도\n2024 | 548 | +17.8%\n2025 | 1075 | +96.2%'},
+  {id:'line',name:'추이 차트',desc:'성장률·시장규모',icon:'⌁',help:'기간 | 값 | 보조설명(선택)',sample:'2022 | 320 | \n2023 | 465 | +45.3%\n2024 | 548 | +17.8%\n2025 | 1075 | +96.2%'},
+  {id:'waterfall',name:'증감 브리지',desc:'이익·현금 증감',icon:'▰',help:'항목 | 값 (첫 줄 시작값, 중간 증감값, 마지막 종료값)',sample:'기초 현금 | 120\n영업현금흐름 | 45\n설비투자 | -70\n차입금 상환 | -35\n기말 현금 | 60'},
+  {id:'donut',name:'구성비 차트',desc:'매출·지분 구성',icon:'◉',help:'항목 | 값 | 보조설명(선택)',sample:'제품 매출 | 420 | 핵심 사업\n상품 매출 | 135 | 유통\n서비스 | 45 | 유지보수'},
+  {id:'flow',name:'사업구조',desc:'매입→판매 흐름',icon:'→',help:'단계 | 제목 | 세부설명',sample:'01 | 원재료·상품 매입 | 공급사 및 계열사\n02 | 저장·가공 | 품질 및 재고 관리\n03 | 유통·납품 | 물류망을 통한 공급\n04 | 최종 고객 | 법인·소매 고객'},
+  {id:'org',name:'지배구조',desc:'주주·계열사 관계',icon:'⌘',help:'단계(0부터) | 회사명 | 지분·관계 | 상위회사명',sample:'0 | 모회사 | 지배회사 |\n1 | 대상회사 | 70% | 모회사\n1 | 계열사 A | 100% | 모회사\n2 | 자회사 B | 100% | 대상회사'},
+  {id:'timeline',name:'주요 일정',desc:'회생·딜 타임라인',icon:'●',help:'일자 | 사건 | 세부설명',sample:'2025.11 | 유동성 악화 | 매입대금 및 차입 부담 증가\n2026.01 | 회생 신청 | 법원에 회생절차 신청\n2026.02 | 개시 결정 | 조사위원 선임\n2026.05 | 계획안 제출 | 변제 및 투자구조 협의'},
+  {id:'matrix',name:'리스크 매트릭스',desc:'가능성×영향도',icon:'▦',help:'리스크 | 가능성(1~5) | 영향도(1~5)',sample:'고객사 투자 지연 | 4 | 5\n원재료 가격 상승 | 3 | 4\n핵심인력 이탈 | 2 | 4\n환율 변동 | 4 | 3'}
+];
+const palettes={
+  navy:{dark:'#1b3157',main:'#3973d5',accent:'#e7a73d',light:'#dce8f7',ink:'#172238'},
+  forest:{dark:'#173d35',main:'#2f846d',accent:'#d4a84f',light:'#dceee8',ink:'#162d29'},
+  burgundy:{dark:'#552637',main:'#a14c62',accent:'#d59a51',light:'#f1dfe5',ink:'#39202a'},
+  mono:{dark:'#252b35',main:'#707987',accent:'#b7bdc6',light:'#e5e8ec',ink:'#20252d'}
+};
+const defaultState={type:'bar',title:'최근 3개년 매출 추이 (가상 예시)',subtitle:'입력 형식을 보여주는 가상 데이터',unit:'억원',source:'가상 예시 · 원자료로 교체',data:templates[0].sample,theme:'navy',ratio:'16:9',showValues:true,transparent:false};
+let state={...defaultState};
+try{const saved=JSON.parse(localStorage.getItem('reportVisualStudio'));if(saved)state={...state,...saved}}catch(e){}
+
+const $=s=>document.querySelector(s);
+const svg=$('#graphic'), canvas=$('#canvas');
+const dims=()=>adaptiveDimensions();
+function el(tag,attrs={},text=''){const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n}
+function add(tag,attrs,text,parent=svg){const n=el(tag,attrs,text);parent.appendChild(n);return n}
+function escName(){return (state.title||'report-graphic').replace(/[^\w가-힣]+/g,'_').slice(0,42)}
+function rows(){return parseRows(state.data)}
+function num(v){return parseNumber(v)}
+function fmt(v){return Number(v).toLocaleString('ko-KR',{maximumFractionDigits:4})}
+function wrap(text,max=18){const s=String(text||'');if(s.length<=max)return[s];const out=[];let cur='';for(const ch of s){cur+=ch;if(cur.length>=max){out.push(cur);cur=''}}if(cur)out.push(cur);return out}
+function textLines(x,y,lines,attrs={},gap=24,parent=svg){const t=add('text',{x,y,...attrs},'',parent);lines.forEach((line,i)=>{const sp=el('tspan',{x,dy:i?gap:0},line);t.appendChild(sp)});return t}
+function base(){
+  const [w,h]=dims();svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.innerHTML='';
+  if(!state.transparent)add('rect',{width:w,height:h,fill:'#fff'});
+  add('rect',{x:56,y:48,width:8,height:44,rx:4,fill:palettes[state.theme].accent});
+  add('text',{x:82,y:68,'font-size':Math.min(28,(w-138)/Math.max(1,state.title.length)),'font-weight':800,fill:palettes[state.theme].ink,'letter-spacing':'-.6'},state.title||'제목을 입력하세요');
+  add('text',{x:82,y:94,'font-size':Math.min(15,(w-138)/Math.max(1,state.subtitle.length)),'font-weight':500,fill:'#69758a'},state.subtitle||'');
+  add('line',{x1:56,y1:116,x2:w-56,y2:116,stroke:'#dde3ea','stroke-width':1});
+  add('text',{x:56,y:h-28,'font-size':12,fill:'#8792a4'},`주: 단위 ${state.unit||'-'}`);
+  textLines(w-56,h-42,wrap('자료: '+(state.source||'-'),Math.floor((w-270)/12)).slice(0,2),{'font-size':12,fill:'#8792a4','text-anchor':'end'},14);
+  return {w,h,top:148,bottom:h-60,left:66,right:w-66,p:palettes[state.theme]};
+}
+function renderBar(c,r){
+  const data=r.map(x=>({label:x[0],value:num(x[1]),note:x[2]||''}));const max=Math.max(...data.map(d=>Math.abs(d.value)),1);
+  const chartH=c.bottom-c.top-36,rowH=chartH/Math.max(data.length,1),x0=c.left+150,barW=c.right-x0-90;
+  data.forEach((d,i)=>{const y=c.top+i*rowH+rowH*.2,h=rowH*.56,w=barW*Math.abs(d.value)/max;
+    add('text',{x:x0-18,y:y+h*.68,'text-anchor':'end','font-size':15,'font-weight':700,fill:c.p.ink},d.label);
+    add('rect',{x:x0,y,width:barW,height:h,rx:Math.min(8,h/2),fill:'#eef1f5'});
+    add('rect',{x:x0,y,width:w,height:h,rx:Math.min(8,h/2),fill:i===data.length-1?c.p.main:c.p.dark,opacity:i===data.length-1?1:.88});
+    if(state.showValues)add('text',{x:x0+w+12,y:y+h*.68,'font-size':14,'font-weight':800,fill:c.p.ink},`${fmt(d.value)}${state.unit?' '+state.unit:''}`);
+    if(d.note)add('text',{x:c.right,y:y+h*.68,'text-anchor':'end','font-size':12,'font-weight':700,fill:c.p.accent},d.note);
+  });
+}
+function renderLine(c,r){
+  const data=r.map(x=>({label:x[0],value:num(x[1]),note:x[2]||''}));const vals=data.map(d=>d.value),min=Math.min(...vals,0),max=Math.max(...vals,1),range=max-min||1;
+  const x0=c.left+32,x1=c.right-30,y0=c.bottom-50,y1=c.top+32;
+  for(let i=0;i<5;i++){let y=y0-(y0-y1)*i/4;add('line',{x1:x0,y1:y,x2:x1,y2:y,stroke:'#e5e9ef'});add('text',{x:x0-12,y:y+4,'text-anchor':'end','font-size':11,fill:'#8a95a7'},fmt(min+range*i/4))}
+  const pts=data.map((d,i)=>{const x=x0+(x1-x0)*(i/Math.max(data.length-1,1));const y=y0-(d.value-min)/range*(y0-y1);return{x,y,...d}});
+  const area=`M ${pts[0].x} ${y0} L ${pts.map(p=>`${p.x} ${p.y}`).join(' L ')} L ${pts.at(-1).x} ${y0} Z`;
+  add('path',{d:area,fill:c.p.light,opacity:.7});add('polyline',{points:pts.map(p=>`${p.x},${p.y}`).join(' '),fill:'none',stroke:c.p.main,'stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'});
+  pts.forEach(p=>{add('circle',{cx:p.x,cy:p.y,r:7,fill:'#fff',stroke:c.p.main,'stroke-width':4});add('text',{x:p.x,y:y0+28,'text-anchor':'middle','font-size':13,'font-weight':700,fill:c.p.ink},p.label);if(state.showValues)add('text',{x:p.x,y:p.y-16,'text-anchor':'middle','font-size':13,'font-weight':800,fill:c.p.ink},fmt(p.value))});
+}
+function renderWaterfall(c,r){
+  const data=r.map(x=>({label:x[0],value:num(x[1])}));let running=data[0]?.value||0;const computed=data.map((d,i)=>{if(i===0)return{...d,start:0,end:d.value,total:true};if(i===data.length-1)return{...d,start:0,end:d.value,total:true};const out={...d,start:running,end:running+d.value,total:false};running+=d.value;return out});
+  const all=computed.flatMap(d=>[d.start,d.end]),min=Math.min(...all,0),max=Math.max(...all,1),range=max-min||1;const xGap=(c.right-c.left)/data.length,bw=xGap*.56,y=v=>c.bottom-50-(v-min)/range*(c.bottom-c.top-90);
+  add('line',{x1:c.left,y1:y(0),x2:c.right,y2:y(0),stroke:'#b8c0cc','stroke-width':1.5});
+  computed.forEach((d,i)=>{const x=c.left+i*xGap+xGap*.22,ya=y(Math.max(d.start,d.end)),yb=y(Math.min(d.start,d.end)),color=d.total?c.p.dark:(d.value>=0?c.p.main:'#c65c61');add('rect',{x,y:ya,width:bw,height:Math.max(yb-ya,5),rx:5,fill:color});if(i<computed.length-1)add('line',{x1:x+bw,y1:y(d.end),x2:x+xGap,y2:y(d.end),stroke:'#aeb8c7','stroke-dasharray':'5 5'});add('text',{x:x+bw/2,y:c.bottom-17,'text-anchor':'middle','font-size':12,'font-weight':700,fill:c.p.ink},d.label);if(state.showValues)add('text',{x:x+bw/2,y:ya-11,'text-anchor':'middle','font-size':13,'font-weight':800,fill:color},`${d.value>0&&!d.total?'+':''}${fmt(d.value)}`)});
+}
+function renderDonut(c,r){
+  const data=r.map(x=>({label:x[0],value:Math.max(0,num(x[1])),note:x[2]||''})),total=data.reduce((a,d)=>a+d.value,0)||1;
+  const colors=[c.p.dark,c.p.main,c.p.accent,'#7c91ad','#b9c5d5','#5aa38f'];const cx=c.left+(c.right-c.left)*.3,cy=(c.top+c.bottom)/2-4,R=Math.min(170,(c.bottom-c.top)*.36),inner=R*.58;let angle=-Math.PI/2;
+  const arc=(a0,a1)=>{const x1=cx+R*Math.cos(a0),y1=cy+R*Math.sin(a0),x2=cx+R*Math.cos(a1),y2=cy+R*Math.sin(a1),ix2=cx+inner*Math.cos(a1),iy2=cy+inner*Math.sin(a1),ix1=cx+inner*Math.cos(a0),iy1=cy+inner*Math.sin(a0);return`M${x1} ${y1} A${R} ${R} 0 ${a1-a0>Math.PI?1:0} 1 ${x2} ${y2} L${ix2} ${iy2} A${inner} ${inner} 0 ${a1-a0>Math.PI?1:0} 0 ${ix1} ${iy1} Z`};
+  data.forEach((d,i)=>{if(d.value===0)return;const a1=angle+d.value/total*Math.PI*2;add('path',{d:arc(angle,a1-Math.min(.012,(a1-angle)*.02)),fill:colors[i%colors.length]});angle=a1});
+  add('text',{x:cx,y:cy-4,'text-anchor':'middle','font-size':16,'font-weight':700,fill:'#69758a'},'합계');add('text',{x:cx,y:cy+30,'text-anchor':'middle','font-size':28,'font-weight':900,fill:c.p.ink},fmt(total));
+  const lx=c.left+(c.right-c.left)*.57,ly=c.top+28;
+  data.forEach((d,i)=>{const y=ly+i*58;add('rect',{x:lx,y:y-14,width:14,height:14,rx:3,fill:colors[i%colors.length]});add('text',{x:lx+26,y:y-2,'font-size':15,'font-weight':700,fill:c.p.ink},d.label);add('text',{x:c.right,y:y-2,'text-anchor':'end','font-size':15,'font-weight':800,fill:c.p.ink},`${(d.value/total*100).toFixed(1)}%`);if(state.showValues)add('text',{x:lx+26,y:y+18,'font-size':12,fill:'#7c8799'},`${fmt(d.value)}${state.unit?' '+state.unit:''}${d.note?' · '+d.note:''}`)});
+}
+function renderFlow(c,r){
+  const data=r.map(x=>({step:x[0],title:x[1]||'',detail:x[2]||''})),n=data.length,gap=24,w=(c.right-c.left-gap*(n-1))/n,h=Math.min(190,c.bottom-c.top-65),y=c.top+(c.bottom-c.top-h)/2-6;
+  data.forEach((d,i)=>{const x=c.left+i*(w+gap);add('rect',{x,y,width:w,height:h,rx:14,fill:i===n-1?c.p.dark:'#f6f8fb',stroke:i===n-1?c.p.dark:'#dce2ea','stroke-width':2});add('text',{x:x+20,y:y+34,'font-size':12,'font-weight':900,fill:i===n-1?'#dbe7fa':c.p.main},d.step);textLines(x+20,y+70,wrap(d.title,Math.max(5,Math.floor((w-40)/18))),{'font-size':18,'font-weight':850,fill:i===n-1?'#fff':c.p.ink},25);if(state.showValues)textLines(x+20,y+h-46,wrap(d.detail,Math.max(8,Math.floor((w-40)/12))),{'font-size':12,'font-weight':500,fill:i===n-1?'#c9d6e8':'#718096'},18);if(i<n-1){add('line',{x1:x+w+5,y1:y+h/2,x2:x+w+gap-7,y2:y+h/2,stroke:c.p.accent,'stroke-width':3});add('path',{d:`M${x+w+gap-12} ${y+h/2-6} L${x+w+gap-4} ${y+h/2} L${x+w+gap-12} ${y+h/2+6}`,fill:'none',stroke:c.p.accent,'stroke-width':3})}});
+}
+function renderOrg(c,r){
+  const data=r.map(x=>({level:Math.min(2,Math.max(0,num(x[0]))),title:x[1]||'',detail:x[2]||''}));const groups=[0,1,2].map(l=>data.filter(d=>d.level===l));const positions=[];
+  groups.forEach((g,l)=>{if(!g.length)return;const y=c.top+50+l*145,span=c.right-c.left;g.forEach((d,i)=>{const w=Math.min(220,(span-20*(g.length-1))/g.length),x=c.left+(span/g.length)*i+(span/g.length-w)/2;positions.push({l,i,x,y,w,d});add('rect',{x,y,width:w,height:82,rx:12,fill:l===0?c.p.dark:(l===1?c.p.light:'#f5f7fa'),stroke:l===0?c.p.dark:'#d7dfe9','stroke-width':2});add('text',{x:x+w/2,y:y+34,'text-anchor':'middle','font-size':16,'font-weight':850,fill:l===0?'#fff':c.p.ink},d.title);if(state.showValues)add('text',{x:x+w/2,y:y+58,'text-anchor':'middle','font-size':12,'font-weight':650,fill:l===0?'#cbd7e8':c.p.main},d.detail)})});
+  [1,2].forEach(l=>{const parents=positions.filter(p=>p.l===l-1),children=positions.filter(p=>p.l===l);children.forEach(ch=>{const pa=parents[Math.min(ch.i,parents.length-1)]||parents[0];if(pa){const x1=pa.x+pa.w/2,y1=pa.y+82,x2=ch.x+ch.w/2,y2=ch.y;const mid=(y1+y2)/2;const path=el('path',{d:`M${x1} ${y1} V${mid} H${x2} V${y2}`,fill:'none',stroke:'#aab5c5','stroke-width':2});svg.insertBefore(path,svg.children[5]||null)}})});
+}
+function renderTimeline(c,r){
+  const data=r.map(x=>({date:x[0],title:x[1]||'',detail:x[2]||''})),y=(c.top+c.bottom)/2-10,span=c.right-c.left-180,x0=c.left+90;add('line',{x1:x0,y1:y,x2:x0+span,y2:y,stroke:'#cfd6e1','stroke-width':4,'stroke-linecap':'round'});
+  data.forEach((d,i)=>{const x=x0+span*(i/Math.max(data.length-1,1)),up=i%2===0,ty=up?y-68:y+76;add('line',{x1:x,y1:y,x2:x,y2:up?y-35:y+35,stroke:c.p.main,'stroke-width':2});add('circle',{cx:x,cy:y,r:10,fill:'#fff',stroke:c.p.main,'stroke-width':5});add('text',{x,y:up?ty-25:ty-25,'text-anchor':'middle','font-size':12,'font-weight':850,fill:c.p.main},d.date);add('text',{x,y:ty,'text-anchor':'middle','font-size':15,'font-weight':850,fill:c.p.ink},d.title);if(state.showValues)textLines(x,ty+21,wrap(d.detail,13),{'text-anchor':'middle','font-size':11,fill:'#748095'},16)});
+}
+function renderMatrix(c,r){
+  const data=r.map(x=>({label:x[0],prob:Math.min(5,Math.max(1,num(x[1]))),impact:Math.min(5,Math.max(1,num(x[2])))}));const size=Math.min(c.bottom-c.top-70,c.right-c.left-360),x0=c.left+100,y0=c.top+8,cell=size/5;
+  for(let iy=0;iy<5;iy++)for(let ix=0;ix<5;ix++){const score=(5-iy)*(ix+1),fill=score>=16?'#f4c7c9':score>=9?'#f5dfae':'#d7eadf';add('rect',{x:x0+ix*cell,y:y0+iy*cell,width:cell-2,height:cell-2,rx:5,fill});}
+  for(let i=0;i<5;i++){add('text',{x:x0+i*cell+cell/2,y:y0+size+23,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#667387'},i+1);add('text',{x:x0-18,y:y0+(4-i)*cell+cell/2+4,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#667387'},i+1)}
+  add('text',{x:x0+size/2,y:y0+size+46,'text-anchor':'middle','font-size':13,'font-weight':800,fill:c.p.ink},'발생 가능성 →');add('text',{x:x0-66,y:y0+size/2,transform:`rotate(-90 ${x0-66} ${y0+size/2})`,'text-anchor':'middle','font-size':13,'font-weight':800,fill:c.p.ink},'영향도 →');
+  data.forEach((d,i)=>{const cx=x0+(d.prob-.5)*cell,cy=y0+(5-d.impact+.5)*cell;add('circle',{cx,cy,r:17,fill:c.p.dark,stroke:'#fff','stroke-width':3});add('text',{x:cx,y:cy+5,'text-anchor':'middle','font-size':13,'font-weight':900,fill:'#fff'},i+1)});
+  const lx=x0+size+45,ly=y0+8;data.forEach((d,i)=>{const y=ly+i*42;add('circle',{cx:lx,cy:y,r:12,fill:c.p.dark});add('text',{x:lx,y:y+4,'text-anchor':'middle','font-size':10,'font-weight':900,fill:'#fff'},i+1);textLines(lx+22,y-3,wrap(d.label,17),{'font-size':12,'font-weight':700,fill:c.p.ink},15)});
+}
+const renderers={bar:renderBar,line:renderLine,waterfall:renderWaterfall,donut:renderDonut,flow:renderFlow,org:renderOrg,timeline:renderTimeline,matrix:renderMatrix};
+function render(){
+  const r=rows(),error=validateData(state.type,r);
+  canvas.style.aspectRatio=dims().join('/');
+  $('#rowCount').textContent=r.length+'개 항목';
+  $('#dataError').textContent=error;
+  ['pngBtn','svgBtn','copyBtn'].forEach(id=>$('#'+id).disabled=!!error);
+  const c=base();
+  if(error){add('text',{x:c.w/2,y:c.h/2,'text-anchor':'middle','font-size':18,fill:'#9d3c45'},'데이터 입력 내용을 확인해주세요');}
+  else renderers[state.type](c,r);
+  try{localStorage.setItem('reportVisualStudio',JSON.stringify(state));$('#statusText').textContent=error?'입력 확인 필요':'자동 저장됨';}
+  catch(e){$('#statusText').textContent='자동 저장 불가 · 작업 저장을 이용해주세요';}
+}
+function syncControls(){
+  $('#title').value=state.title;$('#subtitle').value=state.subtitle;$('#unit').value=state.unit;$('#source').value=state.source;$('#dataInput').value=state.data;$('#showValues').checked=state.showValues;$('#transparent').checked=state.transparent;
+  document.querySelectorAll('.template').forEach(x=>x.classList.toggle('active',x.dataset.id===state.type));document.querySelectorAll('.swatch').forEach(x=>x.classList.toggle('active',x.dataset.theme===state.theme));document.querySelectorAll('#ratioSeg button').forEach(x=>x.classList.toggle('active',x.dataset.ratio===state.ratio));
+  const t=templates.find(x=>x.id===state.type);$('#dataHelp').textContent=`입력 형식: ${t.help} · 열은 | 또는 Tab으로 구분 (숫자 안 쉼표 유지 가능)`;
+}
+function buildTemplates(){templates.forEach(t=>{const b=document.createElement('button');b.className='template';b.dataset.id=t.id;b.innerHTML=`<span class="icon">${t.icon}</span><span><strong>${t.name}</strong><small>${t.desc}</small></span>`;b.onclick=()=>{state.type=t.id;state.data=t.sample;state.source='가상 예시 · 원자료로 교체';state.unit=['flow','org','timeline'].includes(t.id)?'해당 없음':t.id==='matrix'?'점 (1~5)':'억원';state.title={bar:'연도별 실적 비교',line:'시장 규모 및 성장 추이',waterfall:'현금 증감 요인',donut:'사업부문별 매출 구성',flow:'핵심 사업구조',org:'주요 지배구조',timeline:'회생절차 주요 경과',matrix:'핵심 리스크 평가'}[t.id];state.subtitle={flow:'수요가 매출로 연결되는 핵심 흐름',org:'주요 주주 및 계열회사 관계',timeline:'유동성 악화에서 정상화 추진까지',matrix:'발생 가능성과 재무적 영향도를 기준으로 평가'}[t.id]||'';syncControls();render()};$('#templateList').appendChild(b)})}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+['title','subtitle','unit','source'].forEach(id=>$('#'+id).addEventListener('input',e=>{state[id]=e.target.value;$('#statusText').textContent='저장 중…';render()}));
+$('#dataInput').addEventListener('input',e=>{state.data=e.target.value;$('#statusText').textContent='저장 중…';render()});
+$('#showValues').onchange=e=>{state.showValues=e.target.checked;render()};$('#transparent').onchange=e=>{state.transparent=e.target.checked;render()};
+$('#ratioSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;state.ratio=b.dataset.ratio;syncControls();render()};
+$('#palette').onclick=e=>{const b=e.target.closest('.swatch');if(!b)return;state.theme=b.dataset.theme;syncControls();render()};
+$('#sampleBtn').onclick=()=>{state.source='가상 예시 · 원자료로 교체';state.data=templates.find(x=>x.id===state.type).sample;syncControls();render()};
+$('#promptBtn').onclick=()=>openWorkflow('prompt');
+function svgString(){const clone=svg.cloneNode(true);clone.setAttribute('xmlns',NS);clone.setAttribute('width',dims()[0]);clone.setAttribute('height',dims()[1]);const style=document.createElementNS(NS,'style');style.textContent=`text{font-family:Pretendard,'Noto Sans KR','Apple SD Gothic Neo',Arial,sans-serif}`;clone.insertBefore(style,clone.firstChild);return new XMLSerializer().serializeToString(clone)}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+$('#svgBtn').onclick=()=>{download(new Blob([svgString()],{type:'image/svg+xml;charset=utf-8'}),escName()+'.svg');toast('SVG를 저장했습니다')};
+async function pngBlob(){const s=svgString(),url=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'})),img=new Image();return new Promise((resolve,reject)=>{img.onload=()=>{const [w,h]=dims(),cv=document.createElement('canvas');const scale=Math.min(2,8192/w,8192/h,Math.sqrt(24000000/(w*h)));cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.scale(scale,scale);if(!state.transparent){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h)}ctx.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);cv.toBlob(blob=>blob?resolve(blob):reject(new Error('이미지 변환 실패')),'image/png')};img.onerror=reject;img.src=url})}
+$('#pngBtn').onclick=async()=>{try{download(await pngBlob(),escName()+'.png');toast('고해상도 PNG를 저장했습니다')}catch(e){toast('이 크기의 PNG 변환이 어렵습니다. 전체 도표는 SVG로 저장해주세요.')}};
+$('#copyBtn').onclick=async()=>{try{const b=await pngBlob();await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('이미지를 클립보드에 복사했습니다')}catch(e){toast('브라우저에서 이미지 복사를 지원하지 않습니다')}};
+$('#saveBtn').onclick=()=>{download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),escName()+'_작업.json');toast('작업 파일을 저장했습니다')};
+$('#loadBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{state=normalizeAnswer(JSON.parse(rd.result),true);syncControls();render();toast('작업을 불러왔습니다')}catch(err){toast(err.message||'올바른 작업 파일이 아닙니다')}};rd.readAsText(f)};
+$('#helpBtn').onclick=()=>$('#modal').classList.add('open');$('#closeModal').onclick=()=>$('#modal').classList.remove('open');$('#modal').onclick=e=>{if(e.target===$('#modal'))$('#modal').classList.remove('open')};
+</script>
+<script src="./reports.js"></script>
+<script src="./studio-model.js"></script>
+<script src="./workflow.js"></script>
+<script src="./adaptive.js"></script>
+<script src="./studio.js"></script>
+<script src="./mammoth.browser.js"></script>
+<script src="./report-review.js"></script>
+<script src="./local-storage.js"></script>
+<script src="./projects.js"></script>
+<script src="./section-templates.js"></script>
+</body>
+</html>
