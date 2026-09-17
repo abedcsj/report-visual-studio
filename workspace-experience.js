@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  const $id=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const VERSION='2026.09.17-09';
+ const VERSION='2026.09.17-11';
  const safeName=name=>String(name).normalize('NFC').replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/^\.+/,'_')||'기업';
  const key=text=>String(text).normalize('NFKC').toLocaleLowerCase().replace(/\s+/g,'');
  function button(label,action,parent,cls='btn'){const b=document.createElement('button');b.type='button';b.className=cls;b.textContent=label;b.onclick=action;parent.append(b);return b;}
@@ -61,7 +61,7 @@
   return{blob:workPackage.zip(entries),filename:safeName(project.name)+'_기업작업.zip',backup,entries};
  }
  async function downloadWork(){if(exporting)return;exporting=true;const buttons=['saveBtn','backupProject','deskBackup'].map($id);buttons.forEach(b=>b.disabled=true);toast('초안과 도식 이미지를 묶고 있습니다…');try{const out=await generatePackage();download(out.blob,out.filename);toast('기업 전체 작업 ZIP을 다운로드했습니다.');}catch(e){toast('다운로드 실패: '+e.message);}finally{exporting=false;buttons.forEach(b=>b.disabled=false);}}
- for(const id of ['saveBtn','backupProject','deskBackup']){$id(id).textContent='기업 작업 다운로드';$id(id).onclick=downloadWork;}
+ for(const id of ['saveBtn','backupProject','deskBackup']){$id(id).textContent='기업 작업 다운로드';$id(id).classList.remove('primary');$id(id).onclick=downloadWork;}
 
  const importer=dialog('workImportDialog','기업 작업 불러오기');const importInfo=document.createElement('p'),importWarning=document.createElement('p'),importName=document.createElement('input'),importError=document.createElement('p');importWarning.className='import-warning';importName.setAttribute('aria-label','새 기업 이름');importName.placeholder='새 기업 이름';importError.setAttribute('role','status');importError.className='dialog-message';importer.body.append(importInfo,importWarning,importName,importError);const importActions=document.createElement('div');importActions.className='dialog-actions';importer.body.append(importActions);let pendingImport=null;
  const replace=button('기존 기업의 작업 복원',()=>applyImport(false),importActions,'btn primary'),asNew=button('새 기업으로 가져오기',()=>applyImport(true),importActions);
@@ -71,10 +71,11 @@
   if(outline!=null&&(!Array.isArray(outline)||outline.some(c=>!c||typeof c.name!=='string'||typeof c.id!=='string'||(!known.has(c.id)&&!/^custom_[a-zA-Z0-9-]+$/.test(c.id)))||new Set(outline.map(c=>c.id)).size!==outline.length))throw Error('목차 형식을 확인해주세요.');
   for(const [id,s]of Object.entries(doc.sections)){
    if(['__proto__','constructor','prototype'].includes(id)||(!known.has(id)&&!outline?.some(c=>c.id===id))||!s||!Array.isArray(s.charts))throw Error('목차 데이터가 올바르지 않습니다.');
-   for(const field of ['notes','questions','research','writingPrompt','freeNotes'])if(s[field]!=null&&typeof s[field]!=='string')throw Error('본문 데이터가 올바르지 않습니다.');s.notes??='';s.questions??='';
-   if(s.paragraphs!=null&&(!Array.isArray(s.paragraphs)||s.paragraphs.some(p=>!p||typeof p.id!=='string'||typeof p.text!=='string')||new Set(s.paragraphs.map(p=>p.id)).size!==s.paragraphs.length))throw Error('문단 데이터가 올바르지 않습니다.');
+   for(const field of ['notes','questions','research','writingPrompt','freeNotes','structureQuestion'])if(s[field]!=null&&typeof s[field]!=='string')throw Error('본문 데이터가 올바르지 않습니다.');s.notes??='';s.questions??='';
+   if(s.paragraphs!=null&&(!Array.isArray(s.paragraphs)||s.paragraphs.some(p=>!p||typeof p.id!=='string'||typeof p.text!=='string'||(p.hint!=null&&typeof p.hint!=='string'))||new Set(s.paragraphs.map(p=>p.id)).size!==s.paragraphs.length))throw Error('문단 데이터가 올바르지 않습니다.');
    if(s.sources!=null&&(!Array.isArray(s.sources)||s.sources.some(v=>!v||typeof v!=='object'||Object.values(v).some(x=>typeof x!=='string'))))throw Error('출처 데이터가 올바르지 않습니다.');
    if(s.attachments!=null&&(!Array.isArray(s.attachments)||s.attachments.some(f=>!f||typeof f.name!=='string'||typeof f.data!=='string'||!/^data:[^,]*;base64,/.test(f.data))))throw Error('첨부파일 데이터가 올바르지 않습니다.');
+   if(s.diagramTypes!=null&&(!Array.isArray(s.diagramTypes)||s.diagramTypes.some(t=>!contracts[t])))throw Error('추천 도식 설정이 올바르지 않습니다.');
    const ids=new Set();for(const c of s.charts){if(!c||typeof c.id!=='string'||ids.has(c.id)||!contracts[c.state?.type]||typeof c.state.data!=='string'||(c.report!=null&&(typeof c.report!=='object'||Array.isArray(c.report))))throw Error('도식 데이터가 올바르지 않습니다.');ids.add(c.id);for(const f of ['title','subtitle','source','unit'])if(c.state[f]!=null&&typeof c.state[f]!=='string')throw Error('도식 글자 데이터가 올바르지 않습니다.');if(c.state.images!=null&&(!Array.isArray(c.state.images)||c.state.images.some(i=>!i||typeof i.src!=='string'||!i.src.startsWith('data:image/'))))throw Error('제품 사진을 다시 확인해주세요.');}
   }
   if(doc.reportMeta&&Object.values(doc.reportMeta).some(v=>typeof v!=='string'))throw Error('보고서 설정을 확인해주세요.');return{...obj,document:doc};
@@ -93,6 +94,8 @@
  studioActions.prepend(topCompany);studioActions.append(topButtons);$id('companyIndicator').hidden=true;$id('projectActions').hidden=true;
  const deskActions=desk.querySelector('.desk-header-actions'),deskCompany=document.createElement('div');deskCompany.className='shell-company';deskCompany.append($id('deskCurrentCompany'),$id('deskStatus'));deskActions.prepend(deskCompany);
  const deskButtons=document.createElement('div');deskButtons.className='shell-buttons';deskButtons.append($id('deskSave'),$id('deskBackup'),$id('deskImport'),$id('deskHome'));deskActions.append(deskButtons);
+ async function goHome(){await returnToCompanies();if(!companyProject){desk.hidden=true;if(picker.d.open)picker.d.close();syncShell();}}
+ for(const [host,id]of [[topButtons,'studioHome'],[deskButtons,'draftHome']]){const homeButton=button('홈',goHome,host);homeButton.id=id;homeButton.title='기업 선택 첫 화면으로';host.prepend(homeButton);}
  const localToolbar=document.createElement('div');localToolbar.className='desk-local-toolbar';localToolbar.append($id('deskPreview'));$id('deskScroll').prepend(localToolbar);
  document.querySelector('.project-backups').hidden=true;
  function outlineNav(){if(!companyProject)return;const entries=companyProject.document.reportOutline||reportChapters;
@@ -103,7 +106,7 @@
   }
  }
  drawChapterNav=outlineNav;document.querySelector('#projectWorkspace>.left>.panel-head').hidden=true;
- const beforeOpen=openCompany;openCompany=async function(id){await beforeOpen(id);syncShell();outlineNav();};
+ const beforeOpen=openCompany;openCompany=async function(id){await beforeOpen(id);syncShell();drawChapterNav();};
  outlineNav();
  window.workStudio={copyChart,generatePackage,parseWork,inspectImport,applyImport,syncShell,version:VERSION};loadCompanyList();
 })();
