@@ -58,7 +58,7 @@
  document.body.appendChild(dialog);
  document.getElementById('closeTableExport').onclick=()=>dialog.close();
  dialog.onclick=event=>{if(event.target===dialog)dialog.close();};
- document.getElementById('copyEditableTable').onclick=async()=>{try{await copyTable();toast('편집 가능한 표를 복사했습니다. Word에 붙여넣으세요.');}catch{toast('표 복사를 지원하지 않는 브라우저입니다. CSV를 이용해주세요.');}};
+ document.getElementById('copyEditableTable').onclick=async()=>{try{await copyTable();toast('편집 가능한 표를 복사했습니다. Word에 붙여넣으세요.');}catch{toast('표 복사를 지원하지 않는 브라우저입니다. Word 표 다운로드를 이용해주세요.');}};
  document.getElementById('downloadTableCsv').onclick=()=>{downloadCsv();toast('Excel용 표 파일을 저장했습니다.');};
  window.reportTableExport={currentTable,tableHtml,plainText};
 })();

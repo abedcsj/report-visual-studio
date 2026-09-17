@@ -88,6 +88,7 @@
   <link rel="stylesheet" href="./table-export.css">
   <link rel="stylesheet" href="./report-workspace.css">
 <link rel="stylesheet" href="report-editor.css">
+<link rel="stylesheet" href="studio-refinements.css">
 </head>
 <body>
   <header class="topbar">
@@ -194,7 +195,7 @@
             <button class="swatch" data-theme="mono" aria-label="모노"><i style="background:linear-gradient(90deg,#252b35 0 33%,#707987 33% 66%,#b7bdc6 66%)"></i></button>
           </div>
           <div class="checks"><input type="checkbox" id="showValues" checked><label for="showValues">수치·세부설명 표시</label></div>
-          <div class="checks"><input type="checkbox" id="transparent"><label for="transparent">배경 투명(SVG·PNG)</label></div>
+          <div class="checks"><input type="checkbox" id="transparent"><label for="transparent">이미지 배경 투명</label></div>
         </div>
       </div>
     </aside>
@@ -394,7 +395,7 @@ function svgString(){const clone=svg.cloneNode(true);clone.setAttribute('xmlns',
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('#svgBtn').onclick=()=>{download(new Blob([svgString()],{type:'image/svg+xml;charset=utf-8'}),escName()+'.svg');toast('SVG를 저장했습니다')};
 async function pngBlob(){const s=svgString(),url=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'})),img=new Image();return new Promise((resolve,reject)=>{img.onload=()=>{const [w,h]=dims(),cv=document.createElement('canvas');const scale=Math.min(2,8192/w,8192/h,Math.sqrt(24000000/(w*h)));cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.scale(scale,scale);if(!state.transparent){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h)}ctx.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);cv.toBlob(blob=>blob?resolve(blob):reject(new Error('이미지 변환 실패')),'image/png')};img.onerror=reject;img.src=url})}
-$('#pngBtn').onclick=async()=>{try{download(await pngBlob(),escName()+'.png');toast('고해상도 PNG를 저장했습니다')}catch(e){toast('이 크기의 PNG 변환이 어렵습니다. 전체 도표는 SVG로 저장해주세요.')}};
+$('#pngBtn').onclick=async()=>{try{download(await pngBlob(),escName()+'.png');toast('이미지를 저장했습니다')}catch(e){toast('이 크기의 PNG 변환이 어렵습니다. 전체 도표는 SVG로 저장해주세요.')}};
 $('#copyBtn').onclick=async()=>{try{const b=await pngBlob();await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);toast('이미지를 클립보드에 복사했습니다')}catch(e){toast('브라우저에서 이미지 복사를 지원하지 않습니다')}};
 $('#saveBtn').onclick=()=>{download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),escName()+'_작업.json');toast('작업 파일을 저장했습니다')};
 $('#loadBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{state=normalizeAnswer(JSON.parse(rd.result),true);syncControls();render();toast('작업을 불러왔습니다')}catch(err){toast(err.message||'올바른 작업 파일이 아닙니다')}};rd.readAsText(f)};
@@ -418,5 +419,6 @@ $('#helpBtn').onclick=()=>$('#modal').classList.add('open');$('#closeModal').onc
 <script src="executive-templates.js"></script>
 <script src="report-documents.js"></script>
 <script src="report-editor.js"></script>
+<script src="studio-refinements.js"></script>
 </body>
 </html>
