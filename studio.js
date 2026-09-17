@@ -60,7 +60,7 @@ function createPlan(){
  const visualType=reportBaseType(state.type),specialized=specializedTypes[state.type];
  const f=state.fontSize||16,g=(state.spacing||1)*16,p=palettes[state.theme],r=rows();
  let width=Math.max(state.layoutWidth||1200,100+10*g+f*12);
- const commands=[],photos=[];let tableData=null;
+ const commands=[],photos=[],cards=[];let tableData=null;
  const draw=(tag,attrs,text)=>commands.push({tag,attrs,text});
  const text=(value,x,y,maxWidth=width-100,size=f,color=p.ink,weight=400)=>{
   const lines=pixelWrap(value,maxWidth,size),lineHeight=size*1.5;
@@ -84,6 +84,7 @@ function createPlan(){
   }y+=g;
  }
  function card(title,items){
+  cards.push({title:String(title??''),items:items.map(([label,value])=>[String(label??''),String(value||'미기재')])});
   const x=50,w=width-100,start=y;const placeholder=commands.length;box(x,y,w,1);
   y+=g;y+=text(title,x+g,y,w-2*g,f*1.3,p.ink,800)+g;
   for(const [label,value] of items){
@@ -240,7 +241,7 @@ function createPlan(){
  const footerHeight=pixelWrap('자료: '+(state.source||'미기재'),width-100,f*.85).length*f*1.275+f*2+g;
  const ratio={'16:9':9/16,'3:2':2/3,'4:3':3/4,'1:1':1}[state.ratio]||9/16;
  const height=Math.max(width*ratio,top+y+footerHeight+40);
- return {commands,photos,tableData,width:Math.ceil(width),height:Math.ceil(height),top,titleHeight,subHeight,footerHeight,font:f,gap:g};
+ return {commands,photos,tableData,cardData:(state.displayMode==='cards'||(state.displayMode!=='table'&&['ceo','management'].includes(visualType)))?cards:null,width:Math.ceil(width),height:Math.ceil(height),top,titleHeight,subHeight,footerHeight,font:f,gap:g};
 }
 function currentPlan(){const key=JSON.stringify(state);if(planCache?.key===key)return planCache.plan;const plan=createPlan();planCache={key,plan};return plan;}
 adaptiveDimensions=function(){if(validateData(state.type,rows()))return [state.layoutWidth||1200,675];const p=currentPlan();return [p.width,p.height];};
