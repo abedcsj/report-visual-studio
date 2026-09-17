@@ -77,7 +77,8 @@ function drawChartTabs(){
 function setChartVisibility(){
  const selected=!!selectedChart();$('#canvas').hidden=!selected;$('#emptyChapter').hidden=selected;$('#projectWorkspace').classList.toggle('no-chart',!selected);
  $('#chartEditor').hidden=!selected;
- for(const id of ['pngBtn','svgBtn','copyBtn','saveBtn','loadBtn'])$('#'+id).disabled=!selected;
+ for(const id of ['pngBtn','svgBtn','copyBtn'])$('#'+id).disabled=!selected;
+ for(const id of ['saveBtn','loadBtn'])$('#'+id).disabled=!companyProject;
  if(selected)$('#chartName').value=selectedChart().name||state.title;
 }
 async function hydrateChart(raw){

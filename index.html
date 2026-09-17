@@ -85,6 +85,8 @@
   <link rel="stylesheet" href="./usability.css">
   <link rel="stylesheet" href="./projects.css">
   <link rel="stylesheet" href="./preview-zoom.css">
+  <link rel="stylesheet" href="./table-export.css">
+  <link rel="stylesheet" href="./report-workspace.css">
 </head>
 <body>
   <header class="topbar">
@@ -202,7 +204,7 @@
     <div class="modal"><button class="btn close" id="closeModal">닫기</button><h3>원본 자료를 그래프로 바꾸는 방법</h3>
       <ol><li>왼쪽에서 차트·도식을 고르고 <strong>① 유형별 요청문 보기·복사</strong>를 누릅니다.</li><li>복사한 요청문과 원본 엑셀·표를 <strong>ChatGPT 대화에 함께</strong> 보냅니다. 이 사이트가 자료를 AI로 전송하지는 않습니다.</li><li>ChatGPT의 변환 결과를 <strong>② ChatGPT 답변 붙여넣기</strong>에 넣고 적용합니다. 제목·단위·출처·데이터가 한 번에 들어갑니다.</li><li>원자료와 그래프를 확인한 뒤 PNG·SVG로 저장합니다.</li></ol>
       <p>숫자 누락·단위 혼동·증감 합계 오류는 먼저 확인하세요. 예시 데이터는 사용법을 위한 가상 자료이며 보고서에 그대로 사용하면 안 됩니다.</p>
-      <p>기업을 선택하고 왼쪽 목차에서 본문·추가 확인 사항과 도식을 작성하세요. 변경사항과 사진은 이 브라우저에 자동 저장됩니다. 브라우저 데이터 삭제 시 사라질 수 있으므로 기업 작업 백업을 보관해주세요. 기존 온라인 사이트의 자료는 자동 이전되지 않습니다. 상단의 <strong>저장됨</strong>을 확인해주세요. <code>기업 작업 백업</code>은 전체 목차, <code>작업 저장</code>은 현재 도식을 내려받습니다.</p>
+      <p>기업을 선택하고 왼쪽 목차에서 본문·추가 확인 사항과 도식을 작성하세요. 변경사항과 사진은 이 브라우저에 자동 저장됩니다. 브라우저 데이터 삭제 시 사라질 수 있으므로 기업 작업 백업을 보관해주세요. 기존 온라인 사이트의 자료는 자동 이전되지 않습니다. 상단의 <strong>저장됨</strong>을 확인해주세요. <code>기업 전체 작업 다운로드</code>는 초안·출처·메모·프롬프트·첨부파일·모든 도표를 하나의 JSON 파일로 보관합니다. 같은 이름의 기업을 선택하고 기업 작업 불러오기로 다시 가져올 수 있습니다.</p>
     </div>
   </div>
 
@@ -408,5 +410,8 @@ $('#helpBtn').onclick=()=>$('#modal').classList.add('open');$('#closeModal').onc
 <script src="./projects.js"></script>
 <script src="./section-templates.js"></script>
 <script src="./preview-zoom.js"></script>
+<script src="./table-export.js"></script>
+<script src="./report-prompt.js"></script>
+<script src="./report-workspace.js"></script>
 </body>
 </html>
