@@ -68,7 +68,7 @@ async function flushProject(){
 function rememberLocalDraft(){try{if(companyProject&&projectDirty)localStorage.setItem('reportProjectDraft:'+companyProject.id,JSON.stringify({baseRevision:companyProject.revision,document:companyProject.document}));}catch{}}
 function drawChapterNav(){
  $('#chapterNav').innerHTML='';
- for(const meta of reportChapters){const button=document.createElement('button');button.className='chapter-button'+(meta.id===chapterId?' active':'');const title=document.createElement('strong'),status=document.createElement('span');title.textContent=meta.name;const section=companyProject?.document.sections[meta.id];status.textContent=chapterStatus(section)+(section?.charts.length?' · 도식 '+section.charts.length+'개':'');button.appendChild(title);button.appendChild(status);button.onclick=()=>selectChapter(meta.id);$('#chapterNav').appendChild(button);}
+ for(const meta of (companyProject?.document.reportOutline?.map(e=>({...reportChapters.find(c=>c.id===e.id),...e}))||reportChapters)){const button=document.createElement('button');button.className='chapter-button'+(meta.id===chapterId?' active':'');const title=document.createElement('strong'),status=document.createElement('span');title.textContent=meta.name;const section=companyProject?.document.sections[meta.id];status.textContent=chapterStatus(section)+(section?.charts.length?' · 도식 '+section.charts.length+'개':'');button.appendChild(title);button.appendChild(status);button.onclick=()=>selectChapter(meta.id);$('#chapterNav').appendChild(button);}
 }
 function drawChartTabs(){
  const list=$('#chapterChartList');list.innerHTML='';
