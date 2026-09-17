@@ -17,6 +17,7 @@
  // Keep export names focused on the outcome; image output uses PNG internally.
  el('svgBtn').hidden=true;el('pngBtn').textContent='이미지로 저장';el('copyBtn').hidden=true;el('reportReviewBtn').hidden=true;el('reportReviewBtn').onclick=null;el('reportDialog').hidden=true;
  el('tableExportBtn').textContent='Word용 표';el('downloadTableCsv').hidden=true;
+ const release=document.createElement('small');release.className='app-release';release.textContent='버전 2026.09.17-08';document.querySelector('.topbar .brand>div:last-child').append(release);
  const tabs=document.querySelector('.writing-tabs');tabs.append(el('newChapterChart'));el('newChapterChart').textContent='＋ 도표·도식 추가';
  document.querySelector('.brand strong').textContent='도식/도표 작업실';document.querySelector('.brand span').textContent='CHART & DIAGRAM STUDIO';
  document.querySelector('.hintbar').textContent='유형 선택 → 도표·도식 편집 → 도식 저장 · 보고서 초안 작업실에서 문단과 함께 배치합니다.';

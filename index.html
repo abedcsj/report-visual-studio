@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>기업보고서 비주얼 스튜디오</title>
-  <meta name="description" content="기업분석 보고서용 차트와 도식을 빠르게 만들고 PNG·SVG로 저장하는 도구">
+  <title>기업보고서 사이트</title>
+  <meta name="description" content="기업별 분석 초안, 출처, 표와 도식을 함께 작성하고 보관하는 사이트">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b3157'/%3E%3Cpath d='M16 46V29h8v17zm12 0V18h8v28zm12 0V25h8v21z' fill='%23fff'/%3E%3C/svg%3E">
   <style>
     :root{
@@ -81,14 +81,15 @@
     [hidden]{display:none!important}.btn:disabled{opacity:.45;cursor:not-allowed}
     @media(max-width:720px){.workflow-columns{grid-template-columns:1fr}.dialog-body{padding:16px}.dialog-header{padding:16px}.topbar{height:auto;min-height:64px;flex-wrap:wrap;padding-block:10px}.top-actions{flex-wrap:wrap}.hintbar{height:auto;min-height:40px;text-align:center;padding:8px}}
   </style>
-  <link rel="stylesheet" href="./studio.css">
-  <link rel="stylesheet" href="./usability.css">
-  <link rel="stylesheet" href="./projects.css">
-  <link rel="stylesheet" href="./preview-zoom.css">
-  <link rel="stylesheet" href="./table-export.css">
-  <link rel="stylesheet" href="./report-workspace.css">
-<link rel="stylesheet" href="report-editor.css">
-<link rel="stylesheet" href="studio-refinements.css">
+  <link rel="stylesheet" href="./studio.css?v=150910eccee2">
+  <link rel="stylesheet" href="./usability.css?v=a43e4d05b33d">
+  <link rel="stylesheet" href="./projects.css?v=d4c021b9c999">
+  <link rel="stylesheet" href="./preview-zoom.css?v=80c2ea2bb8df">
+  <link rel="stylesheet" href="./table-export.css?v=b92e0e7c5bf0">
+  <link rel="stylesheet" href="./report-workspace.css?v=3d5258fd86c3">
+<link rel="stylesheet" href="report-editor.css?v=a9d620e47574">
+<link rel="stylesheet" href="studio-refinements.css?v=3dd1cebd09d5">
+  <link rel="stylesheet" href="workspace-experience.css?v=6597ce1580cf">
 </head>
 <body>
   <header class="topbar">
@@ -401,25 +402,27 @@ $('#saveBtn').onclick=()=>{download(new Blob([JSON.stringify(state,null,2)],{typ
 $('#loadBtn').onclick=()=>$('#fileInput').click();$('#fileInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{state=normalizeAnswer(JSON.parse(rd.result),true);syncControls();render();toast('작업을 불러왔습니다')}catch(err){toast(err.message||'올바른 작업 파일이 아닙니다')}};rd.readAsText(f)};
 $('#helpBtn').onclick=()=>$('#modal').classList.add('open');$('#closeModal').onclick=()=>$('#modal').classList.remove('open');$('#modal').onclick=e=>{if(e.target===$('#modal'))$('#modal').classList.remove('open')};
 </script>
-<script src="./reports.js"></script>
-<script src="./studio-model.js"></script>
-<script src="./workflow.js"></script>
-<script src="./adaptive.js"></script>
-<script src="./studio.js"></script>
-<script src="./mammoth.browser.js"></script>
-<script src="./report-review.js"></script>
-<script src="./local-storage.js"></script>
-<script src="./projects.js"></script>
-<script src="./section-templates.js"></script>
-<script src="./preview-zoom.js"></script>
-<script src="./table-export.js"></script>
-<script src="./report-prompt.js"></script>
-<script src="./report-workspace.js"></script>
-<script src="docx.browser.js"></script>
-<script src="executive-templates.js"></script>
-<script src="report-documents.js"></script>
-<script src="paragraph-model.js"></script>
-<script src="report-editor.js"></script>
-<script src="studio-refinements.js"></script>
+<script src="./reports.js?v=d01c1d04512d"></script>
+<script src="./studio-model.js?v=4f3df2de809b"></script>
+<script src="./workflow.js?v=70a3e889e052"></script>
+<script src="./adaptive.js?v=afbf4772d0ed"></script>
+<script src="./studio.js?v=9d8ce1d80a92"></script>
+<script src="./mammoth.browser.js?v=e87a873e0aec"></script>
+<script src="./report-review.js?v=6961b5260bf5"></script>
+<script src="./local-storage.js?v=92886c9f9089"></script>
+<script src="./projects.js?v=f45790104828"></script>
+<script src="./section-templates.js?v=86acb488adbe"></script>
+<script src="./preview-zoom.js?v=7e4803ca0b9d"></script>
+<script src="./table-export.js?v=5443bc659967"></script>
+<script src="./report-prompt.js?v=ab874cf68e05"></script>
+<script src="./report-workspace.js?v=9c53a8dbba69"></script>
+<script src="docx.browser.js?v=ecef72931c98"></script>
+<script src="executive-templates.js?v=5281a56bc2a6"></script>
+<script src="report-documents.js?v=405f1795b880"></script>
+<script src="paragraph-model.js?v=a5c4596e9431"></script>
+<script src="report-editor.js?v=5abefe9bd6f6"></script>
+<script src="studio-refinements.js?v=e08ba2e5d8f9"></script>
+<script src="work-package.js?v=491ae3d343fb"></script>
+<script src="workspace-experience.js?v=442faee6bec2"></script>
 </body>
 </html>
