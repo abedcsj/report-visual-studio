@@ -30,6 +30,8 @@ api = async function(path, options = {}) {
   }else if(method==='POST'&&!id){
    const name=String(body.name||'').trim();if(!name)return stop('기업명을 입력해주세요.');
    result={id:crypto.randomUUID(),name,document:{sections:{}},revision:0,updated:new Date().toISOString()};store.add(result);
+  }else if(method==='DELETE'&&id){
+   const req=store.get(id);req.onsuccess=()=>{const project=req.result;if(!project)return stop('이미 삭제된 기업입니다.');if(body.name!==project.name)return stop('기업명이 일치하지 않습니다.');if(body.revision!==project.revision)return stop('다른 탭에서 수정되었습니다. 목록을 새로고침하고 다시 확인해주세요.');store.delete(id);result={deleted:id};};
   }else if(method==='PUT'&&id){
    const req=store.get(id);req.onsuccess=()=>{
     const project=req.result;if(!project)return stop('기업을 찾을 수 없습니다.');
