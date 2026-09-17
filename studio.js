@@ -98,7 +98,7 @@ function createPlan(){
   const centers=[];
   items.forEach((row,i)=>{
    const title=row[1],body=row[2]||'',h=pixelWrap(title,w-5*g-f*2,f*1.1).length*f*1.65+(state.showValues?pixelWrap(body,w-5*g-f*2,f).length*f*1.5+g:0)+2*g;
-   centers.push(y+h/2);box(x,y,w,h);draw('circle',{cx:x+g+f,cy:y+g+f,r:f,fill:p.dark});
+   centers.push(y+h/2);box(x,y,w,h,state.type==='D15'&&title.includes('★')?p.light:'#f4f7fb');draw('circle',{cx:x+g+f,cy:y+g+f,r:f,fill:p.dark});
    draw('text',{x:x+g+f,y:y+g+f*1.35,'text-anchor':'middle','font-size':f,fill:'#fff'},i+1);
    let ty=y+g;ty+=text(title,x+3*g+f*2,ty,w-5*g-f*2,f*1.1,p.ink,700);
    if(state.showValues)text(body,x+3*g+f*2,ty+g*.5,w-5*g-f*2,f);
